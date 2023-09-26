@@ -224,6 +224,9 @@ int Lsv_CommandSimAig(Abc_Frame_t* pAbc, int argc, char** argv)
     Abc_NtkForEachObj(pNtk, pObj, i)
     {
       pObj2val[pObj] = 0;
+      if (Abc_AigNodeIsConst(pObj)) {
+        pObj2val[pObj] = -1;
+      }
     }
     // initialize the value of every ptr of pos
     i = 0;
@@ -257,6 +260,7 @@ int Lsv_CommandSimAig(Abc_Frame_t* pAbc, int argc, char** argv)
           pObj2val[pPi] |= mask;
         }
       }
+
       // if pattern count reach 32, do simulation
       if ((patternCount % 32) == 0 && (patternCount != 0))
       {
@@ -307,6 +311,9 @@ int Lsv_CommandSimAig(Abc_Frame_t* pAbc, int argc, char** argv)
         Abc_NtkForEachObj(pNtk, pObj, i)
         {
           pObj2val[pObj] = 0;
+          if (Abc_AigNodeIsConst(pObj)) {
+            pObj2val[pObj] = -1;
+          }
         }
       }
     }
