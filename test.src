@@ -1,0 +1,3 @@
+read ../demo.blif
+collapse
+lsv_sym_bdd 50 1 3
