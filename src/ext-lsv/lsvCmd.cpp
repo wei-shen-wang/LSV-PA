@@ -470,7 +470,7 @@ int Lsv_CommandSymBdd(Abc_Frame_t* pAbc, int argc, char** argv)
       // std::cout << "index: "<< index << "\t" <<  Nm_ManFindNameById(pNtk->pManName, pFanin->Id) << "\n";
     }
     // std::cout << "inputnames: " << input1name << "\t" << input2name << "\n";
-    std::cout << "inputindex: " << input1index << " " << input2index << "\toutputindex: " << outputIndex << "\n";
+    // std::cout << "inputindex: " << input1index << " " << input2index << "\toutputindex: " << outputIndex << "\n";
 
     index = 0;
     Abc_ObjForEachFanin(pNode, pFanin, index)
@@ -653,38 +653,38 @@ int Lsv_CommandSymSat(Abc_Frame_t* pAbc, int argc, char** argv)
       else {
         Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - originalSatSolverVarNum, 0);
         Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 1);
-        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
+        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail a\n"; };
 
         Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - originalSatSolverVarNum, 1);
         Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 0);
-        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
+        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail b\n"; };
       }
     }
     Lits[0] = toLitCond(pCnfDat->pVarNums[input2AigID] - originalSatSolverVarNum, 0);
     Lits[1] = toLitCond(pCnfDat->pVarNums[input1AigID], 1);
-    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail c\n"; };
     Lits[0] = toLitCond(pCnfDat->pVarNums[input2AigID] - originalSatSolverVarNum, 1);
     Lits[1] = toLitCond(pCnfDat->pVarNums[input1AigID], 0);
-    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
-    // sat_solver_add_buffer(pSatSolver, pCnfDat->pVarNums[input1AigID], pCnfDat->pVarNums[input2AigID] - originalSatSolverVarNum, 0);
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail d\n"; };
+
     Lits[0] = toLitCond(pCnfDat->pVarNums[input1AigID] - originalSatSolverVarNum, 0);
     Lits[1] = toLitCond(pCnfDat->pVarNums[input2AigID], 1);
-    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail e\n"; };
     Lits[0] = toLitCond(pCnfDat->pVarNums[input1AigID] - originalSatSolverVarNum, 1);
     Lits[1] = toLitCond(pCnfDat->pVarNums[input2AigID], 0);
-    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
-    // sat_solver_add_buffer(pSatSolver, pCnfDat->pVarNums[input2AigID], pCnfDat->pVarNums[input1AigID] - originalSatSolverVarNum, 0);
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail f\n"; };
 
+    lbool satisfiable = l_False;
     outputAigID = (Aig_ManCo(pAigman, 0))->Id;
     Lits[0] = toLitCond(pCnfDat->pVarNums[outputAigID] - originalSatSolverVarNum, 0);
     Lits[1] = toLitCond(pCnfDat->pVarNums[outputAigID], 0);
-    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail g\n"; };
     Lits[0] = toLitCond(pCnfDat->pVarNums[outputAigID] - originalSatSolverVarNum, 1);
     Lits[1] = toLitCond(pCnfDat->pVarNums[outputAigID], 1);
-    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail\n"; };
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { goto skip; };
 
-    int satisfiable = sat_solver_solve(pSatSolver, nullptr, nullptr, 0, 0, 0, 0);
-
+    satisfiable = sat_solver_solve(pSatSolver, nullptr, nullptr, 0, 0, 0, 0);
+  skip:
     if (satisfiable == l_True) {
       std::vector<int> assymetricPattern1(numberOfPIs);
       std::vector<int> assymetricPattern2(numberOfPIs);
@@ -733,5 +733,196 @@ usage:
 
 int Lsv_CommandSymAll(Abc_Frame_t* pAbc, int argc, char** argv)
 {
-  return 0;
+  Abc_Ntk_t* pNtk = Abc_FrameReadNtk(pAbc);
+  int c;
+  Abc_Obj_t* pObj = nullptr;
+  Abc_Obj_t* pPi = nullptr;
+  Abc_Obj_t* pPo = nullptr;
+  Extra_UtilGetoptReset();
+  while ((c = Extra_UtilGetopt(argc, argv, "h")) != EOF)
+  {
+    switch (c)
+    {
+    case 'h':
+      goto usage;
+    default:
+      goto usage;
+    }
+  }
+
+  int outputIndex, input1index, input2index;
+  if (argc == 2)
+  {
+    outputIndex = std::stoi(argv[1]);
+  }
+  else {
+    goto usage;
+  }
+
+  if (!pNtk)
+  {
+    Abc_Print(-1, "Empty network.\n");
+    return 1;
+  }
+
+  if (!(Abc_NtkHasAig(pNtk)))
+  {
+    std::cout << "Aig is not found\n";
+    return 1;
+  }
+  else
+  {
+    bool symmetric;
+    int input1AigID, input2AigID, outputAigID;
+    int index;
+    lit Lits[4];
+    Aig_Obj_t* pAigObj;
+    Abc_Obj_t* pAbcObj, * pAbcNode;
+    std::unordered_map<int, std::string> aigindex2name;
+    std::unordered_map<std::string, int> name2originalIndex;
+    int numberOfPIs = Abc_NtkCiNum(pNtk);
+    Abc_Obj_t* pPo = Abc_NtkPo(pNtk, outputIndex);
+    pAbcNode = Abc_ObjFanin0(pPo);
+    index = 0;
+    Abc_NtkForEachCi(pNtk, pAbcObj, index)
+    {
+      name2originalIndex.emplace(Nm_ManFindNameById(pNtk->pManName, pAbcObj->Id), index);
+    }
+    Abc_Ntk_t* pConeNtk = Abc_NtkCreateCone(pNtk, pAbcNode, Abc_ObjName(pPo), 1);
+    index = 0;
+    Aig_Man_t* pAigman = Abc_NtkToDar(pConeNtk, 0, 0);
+    Aig_ManForEachCi(pAigman, pAigObj, index)
+    {
+      aigindex2name.emplace(index, Nm_ManFindNameById(pConeNtk->pManName, pAigObj->Id));
+    }
+    sat_solver* pSatSolver = sat_solver_new();
+    Cnf_Dat_t* pCnfDat = Cnf_Derive(pAigman, 1);
+    Cnf_DataWriteIntoSolverInt(pSatSolver, pCnfDat, 1, 0);
+    Cnf_DataLift(pCnfDat, pCnfDat->nVars);
+
+    int originalSatSolverVarNum = pCnfDat->nVars;
+    Cnf_DataWriteIntoSolverInt(pSatSolver, pCnfDat, 1, 0);
+
+    Cnf_DataLift(pCnfDat, originalSatSolverVarNum);
+    // Cnf_DataWriteIntoSolverInt(pSatSolver, pCnfDat, 1, 0);
+    index = 0;
+    Aig_ManForEachCi(pAigman, pAigObj, index)
+    {
+      Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - 2 * originalSatSolverVarNum, 0);
+      Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - originalSatSolverVarNum, 1);
+      Lits[2] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 0);
+      if (!sat_solver_addclause(pSatSolver, Lits, Lits + 3)) { std::cerr << "add clause fail\n"; };
+
+      Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - 2 * originalSatSolverVarNum, 1);
+      Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - originalSatSolverVarNum, 0);
+      Lits[2] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 0);
+      if (!sat_solver_addclause(pSatSolver, Lits, Lits + 3)) { std::cerr << "add clause fail\n"; };
+    }
+
+    index = 0;
+    Aig_ManForEachCi(pAigman, pAigObj, index)
+    {
+      // std::cerr << "index: " << index << "\n";
+      if ((index + 1) == numberOfPIs) {
+        continue;
+      }
+      int index2 = 0;
+      Aig_Obj_t* pAigObj2 = nullptr;
+      Aig_ManForEachCi(pAigman, pAigObj2, index2)
+      {
+        if (index2 <= index) {
+          continue;
+        }
+        // std::cerr << "index2: " << index2 << "\n";
+        Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - 2 * originalSatSolverVarNum, 0);
+        Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id] - originalSatSolverVarNum, 1);
+        Lits[2] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 1);
+        Lits[3] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id], 1);
+        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 4)) { std::cerr << "add clause fail\n"; };
+
+        Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - 2 * originalSatSolverVarNum, 1);
+        Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id] - originalSatSolverVarNum, 0);
+        Lits[2] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 1);
+        Lits[3] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id], 1);
+        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 4)) { std::cerr << "add clause fail\n"; };
+
+        Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id] - 2 * originalSatSolverVarNum, 0);
+        Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - originalSatSolverVarNum, 1);
+        Lits[2] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 1);
+        Lits[3] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id], 1);
+        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 4)) { std::cerr << "add clause fail\n"; };
+
+        Lits[0] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id] - 2 * originalSatSolverVarNum, 1);
+        Lits[1] = toLitCond(pCnfDat->pVarNums[pAigObj->Id] - originalSatSolverVarNum, 0);
+        Lits[2] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 1);
+        Lits[3] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id], 1);
+        if (!sat_solver_addclause(pSatSolver, Lits, Lits + 4)) { std::cerr << "add clause fail\n"; };
+      }
+    }
+
+
+
+    lbool satisfiable = l_Undef;
+    outputAigID = (Aig_ManCo(pAigman, 0))->Id;
+    Lits[0] = toLitCond(pCnfDat->pVarNums[outputAigID] - 2 * originalSatSolverVarNum, 0);
+    Lits[1] = toLitCond(pCnfDat->pVarNums[outputAigID] - originalSatSolverVarNum, 0);
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { std::cerr << "add clause fail g\n"; };
+    Lits[0] = toLitCond(pCnfDat->pVarNums[outputAigID] - 2 * originalSatSolverVarNum, 1);
+    Lits[1] = toLitCond(pCnfDat->pVarNums[outputAigID] - originalSatSolverVarNum, 1);
+    if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { satisfiable = l_False; };
+
+    std::vector<std::pair<int, int>> symmetricPairs;
+    if (satisfiable == l_False) {
+      std::cerr << "here\n";
+      for (int i = 0;i < numberOfPIs - 1;++i) {
+        for (int j = i + 1;j < numberOfPIs;++j) {
+          symmetricPairs.emplace_back(i, j);
+        }
+      }
+      for (auto it : symmetricPairs) {
+        std::cout << it.first << " " << it.second << "\n";
+      }
+      return 0;
+    }
+
+    index = 0;
+    lit assumptions[numberOfPIs];
+    Aig_ManForEachCi(pAigman, pAigObj, index)
+    {
+      Aig_Obj_t* pAigObj2 = nullptr;
+      if ((index + 1) == numberOfPIs) {
+        continue;
+      }
+      int index2 = 0;
+      Aig_ManForEachCi(pAigman, pAigObj2, index2)
+      {
+        if (index2 <= index) {
+          continue;
+        }
+        int index3 = 0;
+        Aig_Obj_t* pAigObj3 = nullptr;
+        Aig_ManForEachCi(pAigman, pAigObj3, index3)
+        {
+          assumptions[index3] = toLitCond(pCnfDat->pVarNums[pAigObj3->Id], 1);
+        }
+        assumptions[index] = toLitCond(pCnfDat->pVarNums[pAigObj->Id], 0);
+        assumptions[index2] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id], 0);
+        satisfiable = sat_solver_solve(pSatSolver, assumptions, assumptions + numberOfPIs, 0, 0, 0, 0);
+        if (satisfiable == l_False) {
+          symmetricPairs.emplace_back(name2originalIndex[aigindex2name[index]], name2originalIndex[aigindex2name[index2]]);
+        }
+      }
+    }
+    for (auto it : symmetricPairs) {
+      std::cout << it.first << " " << it.second << "\n";
+    }
+
+
+    return 0;
+  }
+
+usage:
+  Abc_Print(-2, "usage: lsv_sym_all [-h]\n");
+  Abc_Print(-2, "\t-h    : print the command usage\n");
+  return 1;
 }
