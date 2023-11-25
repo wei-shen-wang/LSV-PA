@@ -871,6 +871,10 @@ int Lsv_CommandSymAll(Abc_Frame_t* pAbc, int argc, char** argv)
     Lits[1] = toLitCond(pCnfDat->pVarNums[outputAigID] - originalSatSolverVarNum, 1);
     if (!sat_solver_addclause(pSatSolver, Lits, Lits + 2)) { satisfiable = l_False; };
 
+    std::unordered_map<int, int> groups;
+    for(int i = 0;i<numberOfPIs;++i){
+      groups[i] = i;
+    }
     std::vector<std::pair<int, int>> symmetricPairs;
     if (satisfiable == l_False) {
       std::cerr << "here\n";
@@ -899,6 +903,28 @@ int Lsv_CommandSymAll(Abc_Frame_t* pAbc, int argc, char** argv)
         if (index2 <= index) {
           continue;
         }
+
+        int temp1 = index;
+        int temp2 = index2;
+        int flag = false;
+        while ((temp1 != groups[temp1]) && (temp2 != groups[temp2]))
+        {
+          if(temp1 == temp2){
+            groups[index2] = groups[temp1];
+            groups[index] = groups[temp1];
+            symmetricPairs.emplace_back(name2originalIndex[aigindex2name[index]], name2originalIndex[aigindex2name[index2]]);
+            flag = true;
+            break;
+          }
+          else{
+            temp1 = groups[temp1];
+            temp2 = groups[temp2];
+          }
+        }
+        if(flag){
+          continue;
+        }
+        
         int index3 = 0;
         Aig_Obj_t* pAigObj3 = nullptr;
         Aig_ManForEachCi(pAigman, pAigObj3, index3)
@@ -909,6 +935,7 @@ int Lsv_CommandSymAll(Abc_Frame_t* pAbc, int argc, char** argv)
         assumptions[index2] = toLitCond(pCnfDat->pVarNums[pAigObj2->Id], 0);
         satisfiable = sat_solver_solve(pSatSolver, assumptions, assumptions + numberOfPIs, 0, 0, 0, 0);
         if (satisfiable == l_False) {
+          groups[index2] = groups[index];
           symmetricPairs.emplace_back(name2originalIndex[aigindex2name[index]], name2originalIndex[aigindex2name[index2]]);
         }
       }
